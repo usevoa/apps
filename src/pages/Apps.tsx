@@ -45,8 +45,8 @@ export const AppsPage = () => {
       <Navbar />
 
       <main className="pt-32 md:pt-40 px-6 pb-24">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-[1fr,1.2fr] gap-12 md:gap-16 items-start">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 md:gap-12 items-start">
 
             {/* Left column — Hero (sticky) */}
             <div className="md:sticky md:top-40">
