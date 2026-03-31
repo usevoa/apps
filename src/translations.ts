@@ -47,8 +47,8 @@ export const translations = {
       },
       download: {
         title: "Download gratuito",
-        subtitle: "Compativel com macOS 11+. Inclui versao Free com opcao de upgrade para PRO.",
-        requirement: "Requer macOS 11 Big Sur ou superior",
+        subtitle: "Compativel com macOS 14+. Inclui versao Free com opcao de upgrade para PRO.",
+        requirement: "Requer macOS 14 Sonoma ou superior",
         windowsSoon: "Versao para Windows em desenvolvimento",
         button: "Baixar moovoa",
         size: "730 KB",
@@ -137,8 +137,8 @@ export const translations = {
       },
       download: {
         title: "Free download",
-        subtitle: "Compatible with macOS 11+. Includes Free version with optional PRO upgrade.",
-        requirement: "Requires macOS 11 Big Sur or later",
+        subtitle: "Compatible with macOS 14+. Includes Free version with optional PRO upgrade.",
+        requirement: "Requires macOS 14 Sonoma or later",
         windowsSoon: "Windows version in development",
         button: "Download moovoa",
         size: "730 KB",

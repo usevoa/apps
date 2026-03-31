@@ -31,7 +31,7 @@ export const MoovoaPage = () => {
                     {m.hero.badge}
                   </span>
                   <span className="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 text-text-secondary-light dark:text-text-secondary-dark px-3 py-1 rounded-lg text-xs font-medium">
-                    <Monitor size={12} /> macOS 11+
+                    <Monitor size={12} /> macOS 14+
                   </span>
                 </div>
               </FadeIn>
