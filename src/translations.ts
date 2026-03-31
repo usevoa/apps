@@ -5,8 +5,16 @@ export const translations = {
       cta: "Criar meu site"
     },
     apps: {
-      title: "Apps",
-      subtitle: "Ferramentas criadas pela VOA.",
+      badge: "VOA Apps",
+      title: "Ferramentas que simplificam",
+      titleHighlight: "o seu dia.",
+      subtitle: "Apps leves, focados e feitos para resolver problemas reais. Criados pela VOA Digital.",
+      filter: "Filtrar por plataforma",
+      featured: "Destaque",
+      free: "Gratis",
+      comingSoon: "Em breve",
+      comingSoonDesc: "Estamos trabalhando em novos apps para esta plataforma.",
+      explore: "Explorar",
       platforms: {
         all: "Todos",
         macos: "macOS",
@@ -17,12 +25,16 @@ export const translations = {
       },
       items: [
         {
+          slug: "moovoa",
           name: "moovoa",
           tagline: "Mantenha seu Mac acordado.",
-          desc: "Mantém seu Mac acordado movendo o cursor automaticamente. Leve, discreto e eficiente.",
+          desc: "Move o cursor automaticamente em intervalos configuraveis, impedindo que seu Mac entre em repouso. Leve, discreto e eficiente.",
           badge: "macOS",
           platform: "macos",
-          cta: "Saiba mais"
+          price: "Gratis",
+          cta: "Saiba mais",
+          icon: "/moovoa-icon.png",
+          screenshot: "/moovoa-screenshot.svg"
         }
       ]
     },
@@ -30,30 +42,30 @@ export const translations = {
       hero: {
         badge: "macOS App",
         title: "Mantenha seu Mac acordado,",
-        titleHighlight: "sem esforço.",
-        subtitle: "O moovoa move o cursor automaticamente em intervalos configuráveis, impedindo que seu Mac entre em repouso. Discreto, leve e sempre ativo."
+        titleHighlight: "sem esforco.",
+        subtitle: "O moovoa move o cursor automaticamente em intervalos configuraveis, impedindo que seu Mac entre em repouso. Discreto, leve e sempre ativo."
       },
       download: {
         title: "Download gratuito",
-        subtitle: "Compatível com macOS 11+. Inclui versão Free com opção de upgrade para PRO.",
+        subtitle: "Compativel com macOS 11+. Inclui versao Free com opcao de upgrade para PRO.",
         requirement: "Requer macOS 11 Big Sur ou superior",
-        windowsSoon: "Versão para Windows em desenvolvimento",
+        windowsSoon: "Versao para Windows em desenvolvimento",
         button: "Baixar moovoa",
         size: "730 KB",
         pro: "Comprar PRO",
         proDesc: "Desbloqueie Silent Mode, Caffeine Mode, Schedule, Battery Saver e mais."
       },
       features: {
-        title: "Tudo que você precisa",
+        title: "Tudo que voce precisa",
         items: [
-          { title: "3 modos de movimento", desc: "Normal, Smart (curvas naturais) e Stealth (micro-movimentos invisíveis)." },
-          { title: "Silent Mode", desc: "Detecta quando você está usando o Mac e pausa automaticamente. Retoma ao ficar idle.", pro: true },
+          { title: "3 modos de movimento", desc: "Normal, Smart (curvas naturais) e Stealth (micro-movimentos invisiveis)." },
+          { title: "Silent Mode", desc: "Detecta quando voce esta usando o Mac e pausa automaticamente. Retoma ao ficar idle.", pro: true },
           { title: "Caffeine Mode", desc: "Impede completamente que o sistema entre em repouso.", pro: true },
-          { title: "Schedule", desc: "Defina horários ativos. O moovoa pausa fora da janela configurada.", pro: true },
+          { title: "Schedule", desc: "Defina horarios ativos. O moovoa pausa fora da janela configurada.", pro: true },
           { title: "Battery Saver", desc: "Pausa automaticamente quando a bateria cai abaixo do limite definido.", pro: true },
           { title: "Atalho global", desc: "Ative ou desative com um atalho de teclado em qualquer app." },
-          { title: "Menu Bar", desc: "Vive na barra de menu. Sem janelas, sem dock, sem distração." },
-          { title: "Launch at Login", desc: "Inicia junto com o Mac. Configure uma vez e esqueça." }
+          { title: "Menu Bar", desc: "Vive na barra de menu. Sem janelas, sem dock, sem distracao." },
+          { title: "Launch at Login", desc: "Inicia junto com o Mac. Configure uma vez e esqueca." }
         ]
       },
       install: {
@@ -62,7 +74,7 @@ export const translations = {
           "Baixe o arquivo .dmg",
           "Abra o .dmg e arraste o moovoa para Applications",
           "Na primeira abertura: System Settings → Privacy & Security → Open Anyway",
-          "Conceda permissão de Acessibilidade quando solicitado"
+          "Conceda permissao de Acessibilidade quando solicitado"
         ]
       }
     },
@@ -83,8 +95,16 @@ export const translations = {
       cta: "Create my site"
     },
     apps: {
-      title: "Apps",
-      subtitle: "Tools built by VOA.",
+      badge: "VOA Apps",
+      title: "Tools that simplify",
+      titleHighlight: "your day.",
+      subtitle: "Lightweight, focused apps made to solve real problems. Built by VOA Digital.",
+      filter: "Filter by platform",
+      featured: "Featured",
+      free: "Free",
+      comingSoon: "Coming soon",
+      comingSoonDesc: "We're working on new apps for this platform.",
+      explore: "Explore",
       platforms: {
         all: "All",
         macos: "macOS",
@@ -95,12 +115,16 @@ export const translations = {
       },
       items: [
         {
+          slug: "moovoa",
           name: "moovoa",
           tagline: "Keep your Mac awake.",
-          desc: "Keeps your Mac awake by automatically moving the cursor. Lightweight, discreet, and efficient.",
+          desc: "Automatically moves the cursor at configurable intervals, preventing your Mac from sleeping. Lightweight, discreet, and efficient.",
           badge: "macOS",
           platform: "macos",
-          cta: "Learn more"
+          price: "Free",
+          cta: "Learn more",
+          icon: "/moovoa-icon.png",
+          screenshot: "/moovoa-screenshot.svg"
         }
       ]
     },
