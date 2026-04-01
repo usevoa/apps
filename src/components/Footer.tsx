@@ -25,6 +25,7 @@ export const Footer = () => {
             <a href={t.contact.links.whatsapp} target="_blank" rel="noopener noreferrer" className="text-sm text-text-secondary-light dark:text-text-secondary-dark hover:text-brand transition-colors">WhatsApp</a>
             <a href={t.contact.links.instagram} target="_blank" rel="noopener noreferrer" className="text-sm text-text-secondary-light dark:text-text-secondary-dark hover:text-brand transition-colors">Instagram</a>
             <a href={t.contact.links.email} className="text-sm text-text-secondary-light dark:text-text-secondary-dark hover:text-brand transition-colors">E-mail</a>
+            <Link to="/legal/privacy" className="text-sm text-text-secondary-light dark:text-text-secondary-dark hover:text-brand transition-colors">Legal</Link>
           </div>
         </div>
       </motion.div>
