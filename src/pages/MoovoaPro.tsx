@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context';
@@ -7,6 +7,10 @@ import { Footer } from '../components/Footer';
 import { FadeIn, FadeInScale } from '../components/motion';
 import { Check, Shield, Zap, Clock, Battery, Eye, Palette, ArrowLeft, Copy, CheckCircle, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 // -- Features --
 
@@ -153,26 +157,43 @@ const SummaryCard = ({ t, onBuy }: { t: typeof i18n['en']; onBuy: () => void }) 
   </>
 );
 
-// Step 2: Checkout (email + Stripe payment element)
+// Step 2: Checkout wrapper (handles PaymentIntent creation + Elements provider)
 const CheckoutCard = ({ t, onBack, onSuccess }: { t: typeof i18n['en']; onBack: () => void; onSuccess: () => void }) => {
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handlePay = async () => {
+  const handleEmailSubmit = async () => {
     if (!email) return;
-    setIsProcessing(true);
+    setIsCreating(true);
+    setError(null);
 
-    // TODO: Integrate Stripe
-    // 1. Call backend to create PaymentIntent with email
-    // 2. Confirm payment with Stripe Elements
-    // 3. Backend webhook creates Keygen license + sends email
-    // 4. Call onSuccess()
+    try {
+      const res = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (data.clientSecret) {
+        setClientSecret(data.clientSecret);
+      } else {
+        setError(data.error || 'Something went wrong.');
+      }
+    } catch {
+      setError('Connection error. Please try again.');
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
-    // Placeholder — remove when Stripe is integrated
-    setTimeout(() => {
-      setIsProcessing(false);
-      onSuccess();
-    }, 2000);
+  const stripeAppearance = {
+    theme: 'stripe' as const,
+    variables: {
+      colorPrimary: '#0891B2',
+      borderRadius: '12px',
+    },
   };
 
   return (
@@ -200,33 +221,108 @@ const CheckoutCard = ({ t, onBack, onSuccess }: { t: typeof i18n['en']; onBack: 
         <p className="font-bold">{t.price}{t.priceSuffix}</p>
       </div>
 
-      {/* Email */}
+      {!clientSecret ? (
+        <>
+          {/* Email step */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">{t.emailLabel}</label>
+            <div className="relative">
+              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()}
+                placeholder={t.emailPlaceholder}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand transition-all"
+              />
+            </div>
+            <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-2">{t.emailHint}</p>
+          </div>
+
+          {error && (
+            <p className="text-sm text-red-500 mb-4">{error}</p>
+          )}
+
+          <button
+            onClick={handleEmailSubmit}
+            disabled={!email || isCreating}
+            className="w-full bg-brand text-white py-4 rounded-xl font-semibold text-lg hover:bg-brand-hover active:bg-brand-active shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+          >
+            {isCreating ? (
+              <span className="inline-flex items-center gap-2">
+                <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </span>
+            ) : (
+              t.payButton
+            )}
+          </button>
+        </>
+      ) : (
+        /* Payment step */
+        <Elements stripe={stripePromise} options={{ clientSecret, appearance: stripeAppearance }}>
+          <PaymentForm t={t} onSuccess={onSuccess} />
+        </Elements>
+      )}
+
+      <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark text-center flex items-center justify-center gap-1.5">
+        <Shield size={12} />
+        {t.securedBy}
+      </p>
+    </>
+  );
+};
+
+// Stripe PaymentForm (inside Elements provider)
+const PaymentForm = ({ t, onSuccess }: { t: typeof i18n['en']; onSuccess: () => void }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = useCallback(async () => {
+    if (!stripe || !elements) return;
+    setIsProcessing(true);
+    setError(null);
+
+    const { error: submitError } = await elements.submit();
+    if (submitError) {
+      setError(submitError.message ?? 'Payment failed.');
+      setIsProcessing(false);
+      return;
+    }
+
+    const { error: confirmError } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: window.location.origin + '/moovoa/pro?success=true',
+      },
+      redirect: 'if_required',
+    });
+
+    if (confirmError) {
+      setError(confirmError.message ?? 'Payment failed.');
+      setIsProcessing(false);
+      return;
+    }
+
+    // Payment succeeded
+    onSuccess();
+  }, [stripe, elements, onSuccess]);
+
+  return (
+    <>
       <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">{t.emailLabel}</label>
-        <div className="relative">
-          <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark" />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={t.emailPlaceholder}
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand transition-all"
-          />
-        </div>
-        <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-2">{t.emailHint}</p>
+        <PaymentElement />
       </div>
 
-      {/* Stripe Payment Element placeholder */}
-      <div className="mb-6 p-4 rounded-xl border border-dashed border-border-light dark:border-border-dark bg-card-light/50 dark:bg-card-dark/50 min-h-[120px] flex items-center justify-center">
-        <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-          Stripe Payment Element
-        </p>
-      </div>
+      {error && (
+        <p className="text-sm text-red-500 mb-4">{error}</p>
+      )}
 
-      {/* Pay button */}
       <button
-        onClick={handlePay}
-        disabled={!email || isProcessing}
+        onClick={handleSubmit}
+        disabled={!stripe || isProcessing}
         className="w-full bg-brand text-white py-4 rounded-xl font-semibold text-lg hover:bg-brand-hover active:bg-brand-active shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-4"
       >
         {isProcessing ? (
@@ -238,11 +334,6 @@ const CheckoutCard = ({ t, onBack, onSuccess }: { t: typeof i18n['en']; onBack: 
           t.payButton
         )}
       </button>
-
-      <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark text-center flex items-center justify-center gap-1.5">
-        <Shield size={12} />
-        {t.securedBy}
-      </p>
     </>
   );
 };
