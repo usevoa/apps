@@ -158,7 +158,7 @@ const SummaryCard = ({ t, onBuy }: { t: typeof i18n['en']; onBuy: () => void }) 
 );
 
 // Step 2: Checkout wrapper (handles PaymentIntent creation + Elements provider)
-const CheckoutCard = ({ t, onBack, onSuccess }: { t: typeof i18n['en']; onBack: () => void; onSuccess: () => void }) => {
+const CheckoutCard = ({ t, onBack, onSuccess }: { t: typeof i18n['en']; onBack: () => void; onSuccess: (paymentIntentId: string) => void }) => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -261,7 +261,7 @@ const CheckoutCard = ({ t, onBack, onSuccess }: { t: typeof i18n['en']; onBack: 
       ) : (
         /* Payment step */
         <Elements stripe={stripePromise} options={{ clientSecret, appearance: stripeAppearance }}>
-          <PaymentForm t={t} onSuccess={onSuccess} />
+          <PaymentForm t={t} onSuccess={(id) => onSuccess(id)} />
         </Elements>
       )}
 
@@ -274,7 +274,7 @@ const CheckoutCard = ({ t, onBack, onSuccess }: { t: typeof i18n['en']; onBack: 
 };
 
 // Stripe PaymentForm (inside Elements provider)
-const PaymentForm = ({ t, onSuccess }: { t: typeof i18n['en']; onSuccess: () => void }) => {
+const PaymentForm = ({ t, onSuccess }: { t: typeof i18n['en']; onSuccess: (paymentIntentId: string) => void }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -292,7 +292,7 @@ const PaymentForm = ({ t, onSuccess }: { t: typeof i18n['en']; onSuccess: () => 
       return;
     }
 
-    const { error: confirmError } = await stripe.confirmPayment({
+    const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
         return_url: window.location.origin + '/moovoa/pro?success=true',
@@ -307,7 +307,7 @@ const PaymentForm = ({ t, onSuccess }: { t: typeof i18n['en']; onSuccess: () => 
     }
 
     // Payment succeeded
-    onSuccess();
+    onSuccess(paymentIntent?.id ?? '');
   }, [stripe, elements, onSuccess]);
 
   return (
@@ -339,13 +339,50 @@ const PaymentForm = ({ t, onSuccess }: { t: typeof i18n['en']; onSuccess: () => 
 };
 
 // Step 3: Success (license key)
-const SuccessCard = ({ t }: { t: typeof i18n['en'] }) => {
+const SuccessCard = ({ t, paymentIntentId }: { t: typeof i18n['en']; paymentIntentId: string }) => {
   const [copied, setCopied] = useState(false);
+  const [licenseKey, setLicenseKey] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // TODO: Replace with actual license key from API response
-  const licenseKey = 'XXXX-XXXX-XXXX-XXXX-XXXX';
+  // Poll for license key (webhook may take a moment)
+  useState(() => {
+    let attempts = 0;
+    const maxAttempts = 15;
+
+    const poll = async () => {
+      if (!paymentIntentId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/get-license', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentIntentId }),
+        });
+        const data = await res.json();
+
+        if (data.licenseKey) {
+          setLicenseKey(data.licenseKey);
+          setIsLoading(false);
+          return;
+        }
+      } catch {}
+
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(poll, 2000);
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    poll();
+  });
 
   const handleCopy = () => {
+    if (!licenseKey) return;
     navigator.clipboard.writeText(licenseKey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -372,7 +409,13 @@ const SuccessCard = ({ t }: { t: typeof i18n['en'] }) => {
         </p>
         <div className="flex items-center gap-2">
           <code className="flex-1 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-xl px-4 py-3 text-sm font-mono tracking-wider select-all">
-            {licenseKey}
+            {isLoading ? (
+              <span className="inline-flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark">
+                <span className="h-3 w-3 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+              </span>
+            ) : (
+              licenseKey ?? 'Check your email'
+            )}
           </code>
           <button
             onClick={handleCopy}
@@ -420,6 +463,7 @@ export const MoovoaProPage = () => {
   const t = i18n[lang];
   const features = proFeatures[lang];
   const [step, setStep] = useState<Step>('summary');
+  const [paymentIntentId, setPaymentIntentId] = useState('');
 
   return (
     <div className="min-h-screen selection:bg-brand/30 bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark transition-colors duration-300">
@@ -504,8 +548,8 @@ export const MoovoaProPage = () => {
                       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
                     >
                       {step === 'summary' && <SummaryCard t={t} onBuy={() => setStep('checkout')} />}
-                      {step === 'checkout' && <CheckoutCard t={t} onBack={() => setStep('summary')} onSuccess={() => setStep('success')} />}
-                      {step === 'success' && <SuccessCard t={t} />}
+                      {step === 'checkout' && <CheckoutCard t={t} onBack={() => setStep('summary')} onSuccess={(id) => { setPaymentIntentId(id); setStep('success'); }} />}
+                      {step === 'success' && <SuccessCard t={t} paymentIntentId={paymentIntentId} />}
                     </motion.div>
                   </AnimatePresence>
                 </div>

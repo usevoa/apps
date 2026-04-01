@@ -16,11 +16,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: 399, // $3.99 in cents
+      amount: 399,
       currency: 'usd',
       receipt_email: email,
       metadata: {
         product: 'moovoa-pro',
+        price_id: 'price_1THPdx1Im4KIpXGD3KjXHGRm',
         email,
       },
       automatic_payment_methods: {
