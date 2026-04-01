@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context';
@@ -345,12 +345,13 @@ const SuccessCard = ({ t, paymentIntentId }: { t: typeof i18n['en']; paymentInte
   const [isLoading, setIsLoading] = useState(true);
 
   // Poll for license key (webhook may take a moment)
-  useState(() => {
+  useEffect(() => {
+    let cancelled = false;
     let attempts = 0;
-    const maxAttempts = 15;
+    const maxAttempts = 20;
 
     const poll = async () => {
-      if (!paymentIntentId) {
+      if (!paymentIntentId || cancelled) {
         setIsLoading(false);
         return;
       }
@@ -363,7 +364,7 @@ const SuccessCard = ({ t, paymentIntentId }: { t: typeof i18n['en']; paymentInte
         });
         const data = await res.json();
 
-        if (data.licenseKey) {
+        if (!cancelled && data.licenseKey) {
           setLicenseKey(data.licenseKey);
           setIsLoading(false);
           return;
@@ -371,15 +372,17 @@ const SuccessCard = ({ t, paymentIntentId }: { t: typeof i18n['en']; paymentInte
       } catch {}
 
       attempts++;
-      if (attempts < maxAttempts) {
+      if (!cancelled && attempts < maxAttempts) {
         setTimeout(poll, 2000);
-      } else {
+      } else if (!cancelled) {
         setIsLoading(false);
       }
     };
 
     poll();
-  });
+
+    return () => { cancelled = true; };
+  }, [paymentIntentId]);
 
   const handleCopy = () => {
     if (!licenseKey) return;
