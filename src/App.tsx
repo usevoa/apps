@@ -7,6 +7,7 @@ const AppsPage = lazy(() => import('./pages/Apps'));
 const MoovoaPage = lazy(() => import('./pages/Moovoa'));
 const NotFoundPage = lazy(() => import('./pages/NotFound'));
 const LegalPage = lazy(() => import('./pages/Legal'));
+const MoovoaProPage = lazy(() => import('./pages/MoovoaPro'));
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -30,6 +31,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<AppsPage />} />
               <Route path="/moovoa" element={<MoovoaPage />} />
+              <Route path="/moovoa/pro" element={<MoovoaProPage />} />
               <Route path="/legal" element={<LegalPage />} />
               <Route path="/legal/:page" element={<LegalPage />} />
               <Route path="*" element={<NotFoundPage />} />

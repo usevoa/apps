@@ -1,13 +1,12 @@
 import { Download, ShoppingCart, Monitor, Wrench } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../context';
 import { FadeIn, FadeInScale, Stagger, StaggerItem } from '../components/motion';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { WhatsAppButton } from '../components/WhatsAppButton';
 import { motion } from 'motion/react';
-
-const PRO_URL = 'https://www.creem.io/payment/prod_3NXD9zsFFN81PyTZaxMspO';
 
 export const MoovoaPage = () => {
   const { t } = useLanguage();
@@ -57,15 +56,13 @@ export const MoovoaPage = () => {
                     {m.download.button}
                     <span className="text-white/60 text-sm ml-1">({m.download.size})</span>
                   </a>
-                  <a
-                    href={PRO_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    to="/moovoa/pro"
                     className="border border-border-light dark:border-border-dark px-6 py-3.5 rounded-lg font-semibold hover:bg-card-light dark:hover:bg-gray-800 transition-all flex items-center justify-center gap-2"
                   >
                     <ShoppingCart size={18} />
                     {m.download.pro}
-                  </a>
+                  </Link>
                 </div>
                 {/* Windows coming soon */}
                 <div className="flex items-center gap-2 text-sm text-text-secondary-light dark:text-text-secondary-dark">
@@ -151,15 +148,13 @@ export const MoovoaPage = () => {
                   <div className="flex-1">
                     <h3 className="text-2xl md:text-3xl font-bold mb-3">{m.download.pro}</h3>
                     <p className="text-white/70 leading-relaxed mb-6">{m.download.proDesc}</p>
-                    <a
-                      href={PRO_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      to="/moovoa/pro"
                       className="inline-flex items-center gap-2 bg-brand text-white px-6 py-3 rounded-lg font-semibold hover:bg-brand-hover transition-all"
                     >
                       <ShoppingCart size={18} />
                       {m.download.pro}
-                    </a>
+                    </Link>
                   </div>
                   <img
                     src="/moovoa-icon.png"
