@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const KEYGEN_ACCOUNT_ID = '60fb65e1-9a4a-4d82-b75f-74e46fa356ac';
-const KEYGEN_POLICY_ID = '3ad21f2d';
+const KEYGEN_POLICY_ID = '3ad21f2d-c922-47d4-b042-328a9ebcc5d0';
 
 export const config = {
   api: { bodyParser: false },
