@@ -1,11 +1,8 @@
 import Stripe from 'stripe';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 const KEYGEN_ACCOUNT_ID = '60fb65e1-9a4a-4d82-b75f-74e46fa356ac';
 const KEYGEN_POLICY_ID = '3ad21f2d';
-const KEYGEN_TOKEN = process.env.KEYGEN_API_TOKEN!;
 
 export const config = {
   api: { bodyParser: false },
@@ -25,16 +22,13 @@ async function createKeygenLicense(email: string, stripePaymentId: string): Prom
     headers: {
       'Content-Type': 'application/vnd.api+json',
       Accept: 'application/vnd.api+json',
-      Authorization: `Bearer ${KEYGEN_TOKEN}`,
+      Authorization: `Bearer ${process.env.KEYGEN_API_TOKEN}`,
     },
     body: JSON.stringify({
       data: {
         type: 'licenses',
         attributes: {
-          metadata: {
-            email,
-            stripePaymentId,
-          },
+          metadata: { email, stripePaymentId },
         },
         relationships: {
           policy: {
@@ -55,6 +49,22 @@ async function createKeygenLicense(email: string, stripePaymentId: string): Prom
   return null;
 }
 
+async function updatePaymentIntentMetadata(paymentIntentId: string, metadata: Record<string, string>) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(metadata)) {
+    params.append(`metadata[${key}]`, value);
+  }
+
+  await fetch(`https://api.stripe.com/v1/payment_intents/${paymentIntentId}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params.toString(),
+  });
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -63,10 +73,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const body = await buffer(req);
   const sig = req.headers['stripe-signature'] as string;
 
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message);
     return res.status(400).json({ error: 'Invalid signature' });
@@ -81,12 +92,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const licenseKey = await createKeygenLicense(email, paymentIntent.id);
 
       if (licenseKey) {
-        // Store the license key in PaymentIntent metadata for frontend retrieval
-        await stripe.paymentIntents.update(paymentIntent.id, {
-          metadata: {
-            ...paymentIntent.metadata,
-            license_key: licenseKey,
-          },
+        await updatePaymentIntentMetadata(paymentIntent.id, {
+          ...paymentIntent.metadata,
+          license_key: licenseKey,
         });
 
         console.log(`License created for ${email}: ${licenseKey}`);

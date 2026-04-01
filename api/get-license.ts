@@ -1,7 +1,4 @@
-import Stripe from 'stripe';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -15,16 +12,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    const response = await fetch(`https://api.stripe.com/v1/payment_intents/${paymentIntentId}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+      },
+    });
+
+    const paymentIntent = await response.json();
 
     if (paymentIntent.status !== 'succeeded') {
       return res.status(400).json({ error: 'Payment not completed' });
     }
 
-    const licenseKey = paymentIntent.metadata.license_key;
+    const licenseKey = paymentIntent.metadata?.license_key;
 
     if (!licenseKey) {
-      // Webhook might not have processed yet — tell frontend to retry
       return res.status(202).json({ status: 'pending' });
     }
 

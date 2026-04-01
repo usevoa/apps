@@ -1,7 +1,4 @@
-import Stripe from 'stripe';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -14,23 +11,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Email is required' });
   }
 
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    return res.status(500).json({ error: 'Stripe not configured' });
+  }
+
   try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 399,
-      currency: 'usd',
-      receipt_email: email,
-      metadata: {
-        product: 'moovoa-pro',
-        price_id: 'price_1THPdx1Im4KIpXGD3KjXHGRm',
-        email,
+    const response = await fetch('https://api.stripe.com/v1/payment_intents', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      body: new URLSearchParams({
+        amount: '399',
+        currency: 'usd',
+        receipt_email: email,
+        'metadata[product]': 'moovoa-pro',
+        'metadata[price_id]': 'price_1THPdx1Im4KIpXGD3KjXHGRm',
+        'metadata[email]': email,
+        'automatic_payment_methods[enabled]': 'true',
+      }).toString(),
     });
 
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: data.error?.message || 'Stripe error' });
+    }
+
     return res.status(200).json({
-      clientSecret: paymentIntent.client_secret,
+      clientSecret: data.client_secret,
     });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
