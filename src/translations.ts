@@ -51,7 +51,7 @@ export const translations = {
         requirement: "Requer macOS 14 Sonoma ou superior",
         windowsSoon: "Versao para Windows em desenvolvimento",
         button: "Baixar moovoa",
-        size: "730 KB",
+        size: "1.3 MB",
         pro: "Comprar PRO",
         proDesc: "Desbloqueie Silent Mode, Caffeine Mode, Schedule, Battery Saver e mais."
       },
@@ -141,7 +141,7 @@ export const translations = {
         requirement: "Requires macOS 14 Sonoma or later",
         windowsSoon: "Windows version in development",
         button: "Download moovoa",
-        size: "730 KB",
+        size: "1.3 MB",
         pro: "Buy PRO",
         proDesc: "Unlock Silent Mode, Caffeine Mode, Schedule, Battery Saver, and more."
       },
