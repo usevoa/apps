@@ -20,9 +20,9 @@
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
       <enclosure
         url="https://apps.usevoa.com/downloads/moovoa.dmg"
-        length="1428349"
+        length="1437157"
         type="application/octet-stream"
-        sparkle:edSignature="FWeM4XwAKcY9FHz+bW3j3JhSWnBVwlipJSETeh8ylzc9idAcMX+a+Dgkdz2t8UdfNGSTKHLKiKsa/XBbB08NCw=="
+        sparkle:edSignature="XiVTNL1lxXTEjjDvrO39gzSMNvt6/ReVAI/RYGojC3XPqQbzh2Mp8XQ1ZBYd8aOx4euK963pZp2ZUN2EGxa4Dg=="
       />
     </item>
   </channel>

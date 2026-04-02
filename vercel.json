@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/downloads/:path*", "destination": "/downloads/:path*" },
+    { "source": "/appcast.xml", "destination": "/appcast.xml" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
