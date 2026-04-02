@@ -4,5 +4,26 @@
     <title>moovoa Updates</title>
     <description>Updates for moovoa</description>
     <language>en</language>
+    <item>
+      <title>Version 1.2</title>
+      <description><![CDATA[
+        <h2>What's new in 1.2</h2>
+        <ul>
+          <li>Visual refresh: less transparent cards for better readability</li>
+          <li>Fixed: no more Keychain password prompts on unsigned builds</li>
+          <li>Fixed: version number now updates dynamically in the UI</li>
+        </ul>
+      ]]></description>
+      <pubDate>Wed, 02 Apr 2026 14:00:00 -0300</pubDate>
+      <sparkle:version>3</sparkle:version>
+      <sparkle:shortVersionString>1.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://apps.usevoa.com/downloads/moovoa.dmg"
+        length="1439315"
+        type="application/octet-stream"
+        sparkle:edSignature="ana7X2dOrX0QxBmG+AQTJkDLflqkWKRmzCOw/G7YfEGbsEXER8iYYTXYB8RyPUuxcDdisBJm3jpB0YY1L7unAQ=="
+      />
+    </item>
   </channel>
 </rss>
